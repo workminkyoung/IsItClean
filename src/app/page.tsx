@@ -1,6 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import React, { useState } from "react";
+
+const ViolationCard = dynamic(() => import("../components/ViolationCard"), {
+  ssr: false,
+});
 
 interface NaverSearchItem {
   title: string;
@@ -24,14 +29,17 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<NaverSearchItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const sampleViolation = {
+    date: "2023-09-26",
+    reason: "관할 세무서에 사업자를 폐업한 경우",
+    law: "법 제37조 7항",
+    type: "무단 폐업",
+    location: "서울특별시 마포구 신촌로",
+  };
 
   const handleSearch = async () => {
-    if (!searchTerm.trim() || !isClient) return;
+    if (!searchTerm.trim()) return;
 
     setIsLoading(true);
     setError(null);
@@ -69,10 +77,6 @@ export default function Home() {
       setIsLoading(false);
     }
   };
-
-  if (!isClient) {
-    return null; // 서버 사이드에서는 아무것도 렌더링하지 않음
-  }
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -213,6 +217,10 @@ export default function Home() {
               </div>
             </div>
           )}
+        </div>
+        <div className="mt-8">
+          <h2 className="text-3xl font-bold mb-8">위반 사항 조회</h2>
+          <ViolationCard violation={sampleViolation} />
         </div>
       </main>
     </div>
