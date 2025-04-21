@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import React, { useState } from "react";
+import ViolationModal from "@/components/ViolationModal";
 
 const ViolationCard = dynamic(() => import("../components/ViolationCard"), {
   ssr: false,
@@ -25,28 +26,40 @@ const removeHtmlTags = (str: string) => {
 };
 
 export default function Home() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<NaverSearchItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    violation?: {
+      date: string;
+      reason: string;
+      law: string;
+      type: string;
+      location: string;
+    };
+  }>({
+    isOpen: false
+  });
 
   const sampleViolation = {
-    date: "2023-09-26",
-    reason: "관할 세무서에 사업자를 폐업한 경우",
-    law: "법 제37조 7항",
-    type: "무단 폐업",
-    location: "서울특별시 마포구 신촌로",
+    date: "2024-03-20",
+    reason: "유통기한 경과제품 진열",
+    law: "식품위생법 제44조",
+    type: "식품위생법 위반",
+    location: "서울시 강남구 테헤란로 123"
   };
 
   const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
+    if (!searchQuery.trim()) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await fetch(
-        `/api/search?query=${encodeURIComponent(searchTerm)}`
+        `/api/search?query=${encodeURIComponent(searchQuery)}`
       );
 
       if (!response.ok) {
@@ -79,33 +92,31 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-white">
-      {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 w-full h-16 bg-white shadow-sm z-50">
-        <div className="max-w-7xl mx-auto h-full px-4 flex items-center justify-between">
-          <div className="w-6 h-6">
-            <div className="w-2 h-3 bg-gray-700 ml-2 mt-1" />
-          </div>
-          <h1 className="text-lg font-semibold text-gray-800">위생수준 검색</h1>
-          <div className="w-8 h-8" />
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gray-50">
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold text-center mb-8">
+            식품위생법 위반 이력 조회
+          </h1>
 
-      {/* Main Content */}
-      <main className="pt-16 min-h-screen flex flex-col items-center px-4">
-        <div className="max-w-2xl w-full space-y-8 py-8">
-          {/* Title */}
-          <div className="text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              배달 음식점 위생수준 검색
-            </h2>
-            <p className="text-xl text-gray-600">
-              가게명을 검색하여 영업정지 여부를 확인해보세요!
-            </p>
+          {/* 모달 테스트 버튼 */}
+          <div className="mb-8 flex gap-4 justify-center">
+            <button
+              onClick={() => setModalState({ isOpen: true, violation: sampleViolation })}
+              className="py-2 px-4 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors"
+            >
+              위반 있음 테스트
+            </button>
+            <button
+              onClick={() => setModalState({ isOpen: true })}
+              className="py-2 px-4 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors"
+            >
+              위반 없음 테스트
+            </button>
           </div>
 
-          {/* Search Form */}
-          <div className="space-y-4">
+          {/* 기존 검색 폼 */}
+          <form className="flex gap-2 mb-8" onSubmit={handleSearch}>
             <div className="relative">
               <div className="absolute left-4 top-1/2 -translate-y-1/2">
                 <div className="w-4 h-4 bg-gray-400 rounded-full" />
@@ -115,8 +126,8 @@ export default function Home() {
                 placeholder="음식점 상호명을 입력하세요"
                 className="w-full h-12 pl-12 pr-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-black placeholder-gray-400"
                 aria-label="음식점 검색"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
               />
             </div>
@@ -124,11 +135,11 @@ export default function Home() {
               className="w-full h-12 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="검색하기"
               onClick={handleSearch}
-              disabled={isLoading || !searchTerm.trim()}
+              disabled={isLoading || !searchQuery.trim()}
             >
               {isLoading ? "검색 중..." : "검색하기"}
             </button>
-          </div>
+          </form>
 
           {/* Error Message */}
           {error && (
@@ -187,7 +198,7 @@ export default function Home() {
           )}
 
           {/* No Results Message */}
-          {!isLoading && searchTerm && searchResults.length === 0 && !error && (
+          {!isLoading && searchQuery && searchResults.length === 0 && !error && (
             <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
               <div className="flex flex-col items-center space-y-4">
                 <div className="w-12 h-12 text-gray-400">
@@ -218,11 +229,13 @@ export default function Home() {
             </div>
           )}
         </div>
-        <div className="mt-8">
-          <h2 className="text-3xl font-bold mb-8">위반 사항 조회</h2>
-          <ViolationCard violation={sampleViolation} />
-        </div>
       </main>
+
+      <ViolationModal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({ isOpen: false })}
+        violation={modalState.violation}
+      />
     </div>
   );
 }

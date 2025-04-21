@@ -2,8 +2,8 @@
   "[project]/src/components/ViolationCard.tsx [app-client] (ecmascript, next/dynamic entry)": {
     "id": "[project]/src/components/ViolationCard.tsx [app-client] (ecmascript, next/dynamic entry)",
     "files": [
-      "static/chunks/src_components_09d384ca._.js",
-      "static/chunks/src_components_ViolationCard_tsx_9e141b6d._.js"
+      "static/chunks/src_components_ViolationCard_tsx_433ee9a7._.js",
+      "static/chunks/src_components_ViolationCard_tsx_f6d88639._.js"
     ]
   }
 }
