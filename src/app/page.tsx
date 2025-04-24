@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import React, { useState } from "react";
-import ViolationModal from "@/components/ViolationModal";
 
 const ViolationCard = dynamic(() => import("../components/ViolationCard"), {
   ssr: false,
@@ -30,26 +29,6 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<NaverSearchItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [modalState, setModalState] = useState<{
-    isOpen: boolean;
-    violation?: {
-      date: string;
-      reason: string;
-      law: string;
-      type: string;
-      location: string;
-    };
-  }>({
-    isOpen: false
-  });
-
-  const sampleViolation = {
-    date: "2024-03-20",
-    reason: "유통기한 경과제품 진열",
-    law: "식품위생법 제44조",
-    type: "식품위생법 위반",
-    location: "서울시 강남구 테헤란로 123"
-  };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -93,30 +72,21 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-8">
-            식품위생법 위반 이력 조회
-          </h1>
-
-          {/* 모달 테스트 버튼 */}
-          <div className="mb-8 flex gap-4 justify-center">
-            <button
-              onClick={() => setModalState({ isOpen: true, violation: sampleViolation })}
-              className="py-2 px-4 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors"
-            >
-              위반 있음 테스트
-            </button>
-            <button
-              onClick={() => setModalState({ isOpen: true })}
-              className="py-2 px-4 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors"
-            >
-              위반 없음 테스트
-            </button>
+      {/* Main Content */}
+      <main className="pt-16 min-h-screen flex flex-col items-center px-4">
+        <div className="max-w-2xl w-full space-y-8 py-8">
+          {/* Title */}
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              배달 음식점 위생수준 검색
+            </h2>
+            <p className="text-xl text-gray-600">
+              가게명을 검색하여 영업정지 여부를 확인해보세요!
+            </p>
           </div>
 
-          {/* 기존 검색 폼 */}
-          <form className="flex gap-2 mb-8" onSubmit={handleSearch}>
+          {/* Search Form */}
+          <div className="space-y-4">
             <div className="relative">
               <div className="absolute left-4 top-1/2 -translate-y-1/2">
                 <div className="w-4 h-4 bg-gray-400 rounded-full" />
@@ -139,7 +109,7 @@ export default function Home() {
             >
               {isLoading ? "검색 중..." : "검색하기"}
             </button>
-          </form>
+          </div>
 
           {/* Error Message */}
           {error && (
@@ -230,12 +200,6 @@ export default function Home() {
           )}
         </div>
       </main>
-
-      <ViolationModal
-        isOpen={modalState.isOpen}
-        onClose={() => setModalState({ isOpen: false })}
-        violation={modalState.violation}
-      />
     </div>
   );
 }
