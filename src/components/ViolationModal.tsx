@@ -5,7 +5,7 @@ import React from "react";
 interface ViolationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  violation?: {
+  violation: {
     date: string;
     reason: string;
     law: string;
@@ -22,13 +22,13 @@ const ViolationModal: React.FC<ViolationModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 transition-all duration-300"
       onClick={onClose}
     >
-      <div 
+      <div
         className="bg-white rounded-lg w-full max-w-xl mx-4 transform transition-all duration-300 shadow-xl"
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
           {violation ? (
@@ -100,7 +100,8 @@ const ViolationModal: React.FC<ViolationModalProps> = ({
                 위반 사항 없음
               </h2>
               <p className="text-gray-600 text-center mb-4">
-                해당 업소는 현재 식품위생법 관련<br />
+                해당 업소는 현재 식품위생법 관련
+                <br />
                 위반 사항이 없습니다.
               </p>
             </div>

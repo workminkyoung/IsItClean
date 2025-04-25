@@ -1,11 +1,6 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import React, { useState } from "react";
-
-const ViolationCard = dynamic(() => import("../components/ViolationCard"), {
-  ssr: false,
-});
 
 interface NaverSearchItem {
   title: string;
@@ -168,36 +163,39 @@ export default function Home() {
           )}
 
           {/* No Results Message */}
-          {!isLoading && searchQuery && searchResults.length === 0 && !error && (
-            <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="w-12 h-12 text-gray-400">
-                  <svg
-                    className="w-full h-full"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-                <div className="text-center space-y-1">
-                  <p className="text-gray-900 font-medium">
-                    검색 결과가 없습니다
-                  </p>
-                  <p className="text-gray-600 text-sm">
-                    다른 검색어로 다시 시도해보세요
-                  </p>
+          {!isLoading &&
+            searchQuery &&
+            searchResults.length === 0 &&
+            !error && (
+              <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="w-12 h-12 text-gray-400">
+                    <svg
+                      className="w-full h-full"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-gray-900 font-medium">
+                      검색 결과가 없습니다
+                    </p>
+                    <p className="text-gray-600 text-sm">
+                      다른 검색어로 다시 시도해보세요
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </main>
     </div>
