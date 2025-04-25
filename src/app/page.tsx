@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import ViolationModal from "../components/ViolationModal";
 
 interface NaverSearchItem {
   title: string;
@@ -14,6 +15,16 @@ interface NaverSearchItem {
   mapy: string;
 }
 
+interface ViolationInfo {
+  CHNG_DT: string; // 변경일자
+  DSPS_DCSNDT: string; // 행정처분 일자
+  BSSH_NM: string; // 업소명
+  ADDR: string; // 소재지
+  DSPS_CN: string; // 처분내용
+  VIOL_CN: string; // 위반내용
+  DSPS_BASIS: string; // 처분근거
+}
+
 // HTML 태그를 제거하는 함수
 const removeHtmlTags = (str: string) => {
   return str.replace(/<\/?[^>]+(>|$)/g, "");
@@ -24,6 +35,9 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<NaverSearchItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedViolation, setSelectedViolation] =
+    useState<ViolationInfo | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -62,6 +76,40 @@ export default function Home() {
       setSearchResults([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCardClick = async (businessName: string, address: string) => {
+    try {
+      // API 호출 시 업체명과 주소 정보 전달
+      const response = await fetch(
+        `/api/violation?businessName=${encodeURIComponent(
+          businessName
+        )}&address=${encodeURIComponent(address)}`
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "위반 정보 조회 중 오류가 발생했습니다.");
+      }
+
+      console.log("Violation API Response:", JSON.stringify(data, null, 2));
+
+      if (data && data.length > 0) {
+        setSelectedViolation(data[0]); // 가장 최근 위반 정보 사용
+        setIsModalOpen(true);
+      } else {
+        setSelectedViolation(null);
+        setIsModalOpen(true);
+      }
+    } catch (err) {
+      console.error("Violation fetch error:", err);
+      alert(
+        err instanceof Error
+          ? err.message
+          : "위반 정보 조회 중 오류가 발생했습니다."
+      );
     }
   };
 
@@ -135,16 +183,19 @@ export default function Home() {
                 {searchResults.map((result, index) => (
                   <div
                     key={`${result.title}-${index}`}
-                    className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() =>
+                      handleCardClick(
+                        removeHtmlTags(result.title),
+                        result.roadAddress || result.address
+                      )
+                    }
                   >
                     <div className="space-y-2">
                       <div className="flex justify-between items-start">
                         <h4 className="text-lg font-medium text-gray-900">
-                          {result.title}
+                          {removeHtmlTags(result.title)}
                         </h4>
-                        <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                          정상영업
-                        </span>
                       </div>
                       <p className="text-sm text-gray-600">{result.category}</p>
                       <p className="text-sm text-gray-600">
@@ -198,6 +249,23 @@ export default function Home() {
             )}
         </div>
       </main>
+
+      {/* Violation Modal */}
+      <ViolationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        violation={
+          selectedViolation
+            ? {
+                date: selectedViolation.DSPS_DCSNDT,
+                reason: selectedViolation.VIOL_CN,
+                law: selectedViolation.DSPS_BASIS,
+                type: selectedViolation.DSPS_CN,
+                location: selectedViolation.ADDR,
+              }
+            : undefined
+        }
+      />
     </div>
   );
 }
